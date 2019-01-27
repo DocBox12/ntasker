@@ -16,7 +16,7 @@ We added task "Buy bread" and we setting, that it is everyday task. We added a c
 - Nozbe account
 - Email account
 
-# Usage
+# How to start
 
 - create Python3 venv
 - download latest version from Stable branch (if you want use the development version, clone master branch)
@@ -52,7 +52,7 @@ In the file you add all tasks which they will be sent to nozbe. The file is divi
 
 To add task you must use a specific syntax. It looks like this:
 
-"Title task":"comment task"
+`"Title task":"comment task"`
 
 **Example:**
 
@@ -102,9 +102,9 @@ This syntax after execute program it look like this:
 
 ```text
 checklist:
-Buy bread
-Buy shoes
-Buy medicines
+(-) Buy bread
+(-) Buy shoes
+(-) Buy medicines
 ```
 
 Next this text is added to email content and send to your nozbe account. When Nozbe receives a message,he will create a task "Do shopping" which will have be a checklist.
