@@ -61,7 +61,8 @@ To add task you must use a specific syntax. It looks like this:
     "Monday": [
         {
             "Buy bread":"Buy bread in a bakery on the street Washington",
-            "Read a book":"I must finish read a book"
+            "Read a book":"I must finish read a book",
+            "Make dinner":""
         }
     ],
 ```
@@ -72,7 +73,7 @@ Remember: any task that is not last must have comma in the end. If you forget ad
 Expecting property name enclosed in double quotes: line 233 column 9 (char 11102)
 ```
 
-Line means in which place you made a mistake.
+Line means in which place you made a mistake. Also, know that you only have to give the title of the task to make the program work. Adding a comment is optional.
 
 ## Checklist in tasks
 
