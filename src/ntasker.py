@@ -16,6 +16,8 @@ def extract_task():
     DICT_all_tasks = LIST_tasks_from_json[0]
 
     for task in DICT_all_tasks:
+        if task == "___comment___":
+            continue
         comment = DICT_all_tasks.get(task)
         send_email(task, comment)
 
