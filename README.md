@@ -5,14 +5,21 @@ Ntasker is application for automatic addes tasks to Nozbe.
 
 I am using Nozbe to planning every day but this project have a one bugs - if we use a repeating task function and we will add to one task a one category it all tasks have the assigned category.
 
-Example:
+**Example:**
 
 We added task "Buy bread" and we setting, that it is everyday task. We added a category, we finished task but tomorrow we have task "Buy bread" with added category from yesterday. The category has been added to all repetitive tasks. It annoyed me and that's why this program was created.
+
+# Requirements
+
+- Python3
+- Virtualenv Python3
+- Nozbe account
+- Email account
 
 # Usage
 
 - create Python3 venv
-- download latest version from Stable branch
+- download latest version from Stable branch (if you want use the development version, clone master branch)
 - extract archive 
 - go to the src directory
 - run `chmod +x ntasker.py`
