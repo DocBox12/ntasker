@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
 
+# Maintainer: DocBox12
+# Webpage: http://aboutme.morfiblog.pl/
+
 import os
 import json
 import time
