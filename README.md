@@ -118,3 +118,7 @@ JSON not support comments, but this program it support. If you want add comment 
 ```
 
 This syntax will be treated as comment, not task.
+
+# Errors
+
+The program create errors.txt file where they have are all errors created during execute program. The file is created in main program directory.
