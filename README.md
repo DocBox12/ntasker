@@ -18,6 +18,8 @@ We added task "Buy bread" and we setting, that it is everyday task. We added a c
 
 # How to start
 
+**Linux**
+
 - create Python3 venv
 - download latest version from Stable branch (if you want use the development version, clone master branch)
 - extract archive 
@@ -25,6 +27,10 @@ We added task "Buy bread" and we setting, that it is everyday task. We added a c
 - run `chmod +x ntasker.py`
 - configure config.ini and tasks.json
 - run `ntasker.py`
+
+**Windows and macOS**
+
+I am not tested application Windows and macOS and the operating systems is not supported by me.
 
 # Files descriptions
 
@@ -122,3 +128,8 @@ This syntax will be treated as comment, not task.
 # Errors
 
 The program create errors.txt file where they have are all errors created during execute program. The file is created in main program directory.
+
+# Nozbe informations
+
+[On the website](https://help.nozbe.com/advanced/email-tasks/) you find more information about adding tasks from email.
+
