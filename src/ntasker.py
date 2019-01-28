@@ -2,6 +2,7 @@
 
 # Maintainer: DocBox12
 # Webpage: http://aboutme.morfiblog.pl/
+# Version: 
 
 import os
 import json
@@ -43,6 +44,7 @@ def send_email(topic, comment):
             connect_email.close()
             break
         except sys.exc_info()[0] as error:
+            print(error)
             now_time = (time.strftime("%Y-%m-%d-%H:%M:%S"))
             with open(errors_file, 'a') as ef:
                 ef.write(str(now_time))
@@ -70,6 +72,7 @@ if __name__ == "__main__":
         with open(tasks_json) as tf:
             raw_data_from_json = json.load(tf)
     except sys.exc_info()[0] as error:
+            print(error)
             now_time = (time.strftime("%Y-%m-%d-%H:%M:%S"))
             with open(errors_file, 'a') as ef:
                 ef.write(str(now_time))
