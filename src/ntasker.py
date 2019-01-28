@@ -2,7 +2,7 @@
 
 # Maintainer: DocBox12
 # Webpage: http://aboutme.morfiblog.pl/
-# Version: 
+# Version: 1.0
 
 import os
 import json
