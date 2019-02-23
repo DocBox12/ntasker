@@ -13,12 +13,16 @@ from email.message import EmailMessage
 import sys
 import argparse
 
-def extract_task():
+def extract_task(debug):
+
     today_is = time.strftime("%A")
 
     raw_data_from_json = loading_json_file()
 
-    LIST_tasks_from_json = raw_data_from_json.get(today_is)
+    if debug is True:
+        LIST_tasks_from_json = raw_data_from_json.get("debug")
+    else:
+        LIST_tasks_from_json = raw_data_from_json.get(today_is)
 
     DICT_all_tasks = LIST_tasks_from_json[0]
 
@@ -68,6 +72,7 @@ def loading_json_file():
     except sys.exc_info()[0] as error:
             print(error)
             save_logs(error)
+            return
             
             
 
@@ -101,7 +106,15 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--verify", help="Verify json file. If file have errors program return information about this.", action="store_true")
+    parser.add_argument("--debug", help="Send tasks to nozbe without regardless day of the week.", action="store_true")
+    parser.add_argument("--run", help="Run app.", action="store_true")
     args = parser.parse_args()
 
     if args.verify:
         loading_json_file()
+    
+    if args.debug:
+        extract_task(True)
+    
+    if args.run:
+        extract_task(False)
