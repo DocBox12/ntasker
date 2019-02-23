@@ -11,9 +11,12 @@ import configparser
 import smtplib
 from email.message import EmailMessage
 import sys
+import argparse
 
 def extract_task():
     today_is = time.strftime("%A")
+
+    raw_data_from_json = loading_json_file()
 
     LIST_tasks_from_json = raw_data_from_json.get(today_is)
 
@@ -45,13 +48,7 @@ def send_email(topic, comment):
             break
         except sys.exc_info()[0] as error:
             print(error)
-            now_time = (time.strftime("%Y-%m-%d-%H:%M:%S"))
-            with open(errors_file, 'a') as ef:
-                ef.write(str(now_time))
-                ef.write("\t")
-                ef.write(str(error))
-                ef.write("\n")
-                ef.close()
+            save_logs(error)
             i+=1
             if i == 3:
                 exit()
@@ -60,28 +57,37 @@ def send_email(topic, comment):
 
     return
 
-if __name__ == "__main__":
-    # Loading files
-    errors_file = os.path.join(os.path.dirname(__file__), 'errors.txt') 
-    if not os.path.exists(errors_file):
-        os.mknod(errors_file)
 
+def loading_json_file():
     tasks_json = os.path.join(os.path.dirname(__file__), 'tasks.json')
 
     try:
         with open(tasks_json) as tf:
             raw_data_from_json = json.load(tf)
+            return raw_data_from_json
     except sys.exc_info()[0] as error:
             print(error)
-            now_time = (time.strftime("%Y-%m-%d-%H:%M:%S"))
-            with open(errors_file, 'a') as ef:
-                ef.write(str(now_time))
-                ef.write("\t")
-                ef.write(str(error))
-                ef.write("\n")
-                ef.close()
-                exit()
+            save_logs(error)
+            
+            
 
+def save_logs(error):
+    errors_file = os.path.join(os.path.dirname(__file__), 'errors.txt') 
+    if not os.path.exists(errors_file):
+        os.mknod(errors_file)
+
+
+    now_time = (time.strftime("%Y-%m-%d-%H:%M:%S"))
+    with open(errors_file, 'a') as ef:
+        ef.write(str(now_time))
+        ef.write("\t")
+        ef.write(str(error))
+        ef.write("\n")
+        ef.close()
+        exit()
+
+if __name__ == "__main__":
+    # Loading config
     config = configparser.ConfigParser()
 
     config_file = os.path.join(os.path.dirname(__file__), 'config.ini')
@@ -93,4 +99,9 @@ if __name__ == "__main__":
     email_port = config['Email']['port']
     email_address = config['Email']['address']
 
-    extract_task()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--verify", help="Verify json file. If file have errors program return information about this.", action="store_true")
+    args = parser.parse_args()
+
+    if args.verify:
+        loading_json_file()
