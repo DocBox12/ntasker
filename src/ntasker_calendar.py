@@ -41,13 +41,19 @@ def import_tasks_from_calendar(URL, timezone, tags, today, raw_data_from_json):
         if today_is == day_of_week:
             task_name_from_json = raw_data_from_json.get("Calendar")
             DICT_all_tasks = task_name_from_json[0]
-            comment = DICT_all_tasks.get(task_name_from_calendar)
-            if comment is None:
+            for one_task_from_json in DICT_all_tasks:
+                if one_task_from_json == task_name_from_calendar:
+                    comment = DICT_all_tasks.get(task_name_from_calendar)
+                    ntasker_email.send_email(one_task_from_json, comment)
+                    break
+                else:
+                    continue
+
+            else:
                 task_syntax = str(task_name_from_calendar) + " " + str(tags) + " " + str(today.lower()) + " " + str(time_from_task)
                 ntasker_email.send_email(task_syntax, "")
-            else:
-                task_name_from_calendar = task_name_from_calendar + " " + today
-                ntasker_email.send_email(task_name_from_calendar, comment)
+
+                
 
     return
 
