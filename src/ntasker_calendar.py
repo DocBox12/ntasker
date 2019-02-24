@@ -11,7 +11,7 @@ import ntasker_email
 def import_tasks_from_calendar(URL, timezone, tags, today, raw_data_from_json):
 
     if today == "":
-        today = "#Dzisiaj"
+        today = "#Today"
 
     TUPLE_WEEKSDAY = ("Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday")
 
@@ -26,7 +26,6 @@ def import_tasks_from_calendar(URL, timezone, tags, today, raw_data_from_json):
         
         task_name_from_calendar = task_details.name
         start_date_from_task = task_details.begin.to(timezone).format('YYYY,M,DD HH:mm')
-
 
         raw_end_time = task_details.end.to(timezone)
         raw_start_time = task_details.begin.to(timezone)
@@ -46,23 +45,20 @@ def import_tasks_from_calendar(URL, timezone, tags, today, raw_data_from_json):
             task_name_from_json = raw_data_from_json.get("Calendar")
             DICT_all_tasks = task_name_from_json[0]
             for one_task_from_json in DICT_all_tasks:
-                if one_task_from_json == task_name_from_calendar:
+                if one_task_from_json.lower() == "___comment___":
+                    continue
+                if one_task_from_json.lower() == task_name_from_calendar.lower():
                     one_task_from_json = one_task_from_json + " " + str(today) + " " + str(hashtah_time)
                     comment = DICT_all_tasks.get(task_name_from_calendar)
                     ntasker_email.send_email(one_task_from_json, comment)
                     break
                 else:
                     continue
-
             else:                
                 task_syntax = str(task_name_from_calendar) + " " + str(tags) + " " + str(today.lower()) + " " + str(time_from_task) + " " + str(hashtah_time)
                 ntasker_email.send_email(task_syntax, "")
 
-                
-
     return
-
-
 
 def subtracting_time(start_time, end_time):
     subtracting_time_result  = end_time - start_time

@@ -53,12 +53,6 @@ config = configparser.RawConfigParser()
 config_file = os.path.join(os.path.dirname(__file__), 'config.ini')
 config.read(config_file)
 
-email_server = config['Email']['server']
-email_username = config['Email']['username']
-email_password = config['Email']['password']
-email_port = config['Email']['port']
-email_address = config['Email']['address']
-
 ical_url = config['Calendar']['ical_url']
 timezone = config['Calendar']['Timezone']
 tags = config['Calendar']['Tags']
