@@ -8,6 +8,7 @@ URL_VERSION = "https://raw.githubusercontent.com/DocBox12/ntasker/installer/VERS
 URL_REPOSITORY = "https://github.com/DocBox12/ntasker.git"
 URL_WARNING = "https://raw.githubusercontent.com/DocBox12/ntasker/installer/WARNING.TXT"
 MORE_INFORMATION = "https://github.com/DocBox12/ntasker/releases"
+VERION_FILE_NAME = "VERSION.TXT"
 
 def update():
     execute_command = ("""
@@ -43,7 +44,7 @@ def reset_app():
 
 # Check local version
 def check_version():
-    version_file = os.path.join(os.path.dirname(__file__), 'VERSION.txt')
+    version_file = os.path.join(os.path.dirname(__file__), VERION_FILE_NAME)
     with open(version_file, "r") as vf:
         version = vf.read()
         return version
@@ -59,12 +60,24 @@ def search_update():
         print("I can not download the update data.", website_data.status_code)
         exit()
 
-def check_update():
+def return_new_version_info():
+    value = check_update(True)
+    if value is True:
+        info = ("A new version of the program is available. More information can be found on the website %s") % (MORE_INFORMATION)
+        print(info)
+        return
+    else:
+        return
+
+
+def check_update(only_info):
 
     local_version = check_version()
     latest_version = search_update()
 
     if local_version != latest_version:
+        if only_info is True:
+            return True
         value = check_warning()
         print("Do you want to continue? [Y=YES] [N=NO]")
         while True:
@@ -91,12 +104,14 @@ def check_warning():
     if website_data.status_code == 200:
         # Remove all white chars
         raw_data_from_website = website_data.content.decode("utf-8").rstrip('\r\n\t')
+        STR_raw_data_from_website = str(raw_data_from_website).upper()
     else:
         print("I can not download the data. The update was interrupted.", website_data.status_code)
         exit()
     
-    if str(raw_data_from_website).upper() == "YES":
-        print("WARNING! Detected that the latest update changes important files that are necessary for the operation of the update. Read the release information to learn more %s") % (MORE_INFORMATION)
+    if "YES" in STR_raw_data_from_website:
+        statement = ("\n WARNING! Detected that the latest update changes important files that are necessary for the operation of the update. Read the release information to learn more %s \n") % (MORE_INFORMATION)
+        print(statement)
         return True
     else:
         return False
@@ -119,4 +134,4 @@ if __name__ == "__main__":
         reset_app()
 
     if args.check_update:
-        check_update()
+        check_update(False)
