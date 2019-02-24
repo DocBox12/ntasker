@@ -44,7 +44,6 @@ def import_tasks_from_calendar(URL, timezone, tags, today, raw_data_from_json):
             for one_task_from_json in DICT_all_tasks:
                 if one_task_from_json == task_name_from_calendar:
                     one_task_from_json = one_task_from_json + " " + str(today)
-                    print(one_task_from_json)
                     comment = DICT_all_tasks.get(task_name_from_calendar)
                     ntasker_email.send_email(one_task_from_json, comment)
                     break
