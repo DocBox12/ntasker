@@ -10,7 +10,7 @@ import ntasker_email
 
 
 
-def import_tasks_from_calendar(URL, timezone, LIST_translation_weeksday, tags, today, raw_data_from_json):
+def import_tasks_from_calendar(URL, timezone, tags, today, raw_data_from_json):
 
     if today == "":
         today = "#Dzisiaj"
@@ -35,9 +35,7 @@ def import_tasks_from_calendar(URL, timezone, LIST_translation_weeksday, tags, t
         
         numer_day_of_week = datetime.datetime(int(LIST_details_date[0]), int(LIST_details_date[1]), int(LIST_details_date[2])).weekday()
         
-        day_of_week = LIST_translation_weeksday[numer_day_of_week]
-        if day_of_week == "":
-            day_of_week = TUPLE_WEEKSDAY[numer_day_of_week]
+        day_of_week = TUPLE_WEEKSDAY[numer_day_of_week]
 
         today_is = time.strftime("%A")
         if today_is == day_of_week:

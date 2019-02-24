@@ -63,25 +63,8 @@ ical_url = config['Calendar']['ical_url']
 timezone = config['Calendar']['Timezone']
 tags = config['Calendar']['Tags']
 
-# Day of the week
-monday = config['Translation']['Monday']
-tuesday = config['Translation']['Tuesday']
-wednesday = config['Translation']['Wednesday']
-thursday = config['Translation']['Thursday']
-friday = config['Translation']['Friday']
-saturday = config['Translation']['Saturday']
-sunday = config['Translation']['Sunday']
 today = config['Translation']['Today']
 
-LIST_translation_weeksday = (
-    monday,
-    tuesday,
-    wednesday,
-    thursday,
-    friday,
-    saturday,
-    sunday
-)
 parser = argparse.ArgumentParser()
 
 parser.add_argument("--verify", help="Verify json file. If file have errors program return information about this.", action="store_true")
@@ -105,5 +88,5 @@ if args.run:
 
 if args.calendar:
     json_content = loading_json_file()
-    ntasker_calendar.import_tasks_from_calendar(ical_url, timezone, LIST_translation_weeksday, tags, today, json_content)
+    ntasker_calendar.import_tasks_from_calendar(ical_url, timezone, tags, today, json_content)
 
