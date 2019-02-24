@@ -13,8 +13,6 @@ def import_tasks_from_calendar(URL, timezone, tags, today, raw_data_from_json):
     if today == "":
         today = "#Today"
 
-    TUPLE_WEEKSDAY = ("Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday")
-
     raw_url = Calendar(urlopen(URL).read().decode('utf-8'))
 
     raw_url = Calendar(requests.get(URL).text)
@@ -33,15 +31,13 @@ def import_tasks_from_calendar(URL, timezone, tags, today, raw_data_from_json):
         
         LIST_start_date_from_task = start_date_from_task.split(" ")
         details_date = LIST_start_date_from_task[0]
+        
         LIST_details_date = details_date.split(",")
+        day_of_the_month = LIST_details_date[2]
         time_from_task = LIST_start_date_from_task[1]
-        
-        numer_day_of_week = datetime.datetime(int(LIST_details_date[0]), int(LIST_details_date[1]), int(LIST_details_date[2])).weekday()
-        
-        day_of_week = TUPLE_WEEKSDAY[numer_day_of_week]
 
-        today_is = time.strftime("%A")
-        if today_is == day_of_week:
+        today_day_is = time.strftime("%d")
+        if today_day_is == day_of_the_month:
             task_name_from_json = raw_data_from_json.get("Calendar")
             DICT_all_tasks = task_name_from_json[0]
             for one_task_from_json in DICT_all_tasks:
