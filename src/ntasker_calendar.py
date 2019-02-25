@@ -12,6 +12,7 @@ LIST_added = []
 
 def import_tasks_from_calendar(URL, timezone, tags, today, raw_data_from_json):
     
+    # It's used by Nozbe to set the task today's date.
     if today == "":
         today = "#Today"
 
@@ -24,30 +25,37 @@ def import_tasks_from_calendar(URL, timezone, tags, today, raw_data_from_json):
     for i in range(len(LIST_data_from_calendar)):
         task_details = LIST_data_from_calendar[i]
         
-        task_name_from_calendar = task_details.name
-        start_date_from_task = task_details.begin.to(timezone).format('YYYY,M,DD HH:mm')
-        raw_end_time = task_details.end.to(timezone)
-        raw_start_time = task_details.begin.to(timezone)
+        #### CALENDAR ###
+        task_name_from_calendar = task_details.name # Get task name
+        start_date_from_task = task_details.begin.to(timezone).format('YYYYMMDD HH:mm') # Covert time for people
+        raw_end_time = task_details.end.to(timezone) # End time task
+        raw_start_time = task_details.begin.to(timezone) # Start time task
+
+        '''
+        Unfortunately, Nozbe does not understand the calculated time and must be changed. See the subtracting_time function
+        REMEMBER! Nozbe will set the length of the task only when it appears after the word Today. See instructions:
+
+        generate_syntax(True, one_task_from_json, today, hashtah_time, comment
+
+        hashtah_time is after today
+        '''
         hashtah_time = subtracting_time(raw_start_time, raw_end_time)
         
-        LIST_start_date_from_task = start_date_from_task.split(" ")
-        details_date = LIST_start_date_from_task[0]
-        
-        LIST_details_date = details_date.split(",")
-        day_of_the_month = LIST_details_date[2]
-        time_from_task = LIST_start_date_from_task[1]
+        LIST_start_date_from_task = start_date_from_task.split(" ") # Split separate to date and time
+        details_date_from_task = LIST_start_date_from_task[0] # Assign date
 
+        # Loading tasks from json file
         task_name_from_json = raw_data_from_json.get("Calendar")
         DICT_all_tasks = task_name_from_json[0]
 
-        today_day_is = time.strftime("%d")
+        today_is = (time.strftime("%Y%m%d"))
         """
         If task from calendar has sameone date how than today:
         - search for a task in json file
         - if task is in json file, extract comment and send values to generate_syntax funtion
         - is task is not in json file, send values to generate_syntax_function
         """
-        if today_day_is == day_of_the_month:
+        if int(today_is) == int(details_date_from_task):
             for one_task_from_json in DICT_all_tasks:
                 if one_task_from_json.lower() == "___comment___":
                     continue
@@ -58,16 +66,22 @@ def import_tasks_from_calendar(URL, timezone, tags, today, raw_data_from_json):
                 else:
                     continue
             else:
-                generate_syntax(False, task_name_from_calendar, tags, today, time_from_task, hashtah_time)
+                generate_syntax(False, task_name_from_calendar, tags, today, hashtah_time)
             """
-            If the calendar task has a different date than today:
+            If the task with calendar has a smaller date than it is currently:
             - search for a task in json file
-            - if task is in json, extract comment and send values to generate_syntax funtio
+            - if task is in json, extract comment and send values to generate_syntax funtion
             - if task is not in json, return to for i in range (len(LIST_data_from_calendar)):
 
-            This is used because application compare DTSTART from event with time.strftime("%d") (date created event in calendar with day today), but cyclical tasks have DTSTART from first event that has been created. For this reason, cyclical tasks are skipped when only the date is compared. The biggest problem is with everyday tasks.
+            This is used because DTSTART have date a first task created. This is big problem for repeat tasks.
+            The compare works on principle which date is smaller. If date from calendar is bigger than today it task is overlooked. 
+            In order for the dates to be compared, they are generated on the basis:
+
+            YYYYMMDD
+
+            This prevents adding a task from json, which was added to the calendar at a later date.
             """
-        else:
+        elif int(today_is) > int(details_date_from_task):
             for one_task_from_json in DICT_all_tasks:
                 if one_task_from_json.lower() == task_name_from_calendar.lower():
                     comment = DICT_all_tasks.get(one_task_from_json)
@@ -78,6 +92,7 @@ def import_tasks_from_calendar(URL, timezone, tags, today, raw_data_from_json):
 
     return
 
+# Prevents adding the same task twice
 def added_tasks(task_name):
     if len(LIST_added) == 0:
         LIST_added.append(task_name.lower())
@@ -98,22 +113,24 @@ def generate_syntax(*args):
         one_task_from_json = args[1] + " " + str(args[2]) + " " + str(args[3])
         value = added_tasks(args[1])
         if value is False:
-            print(one_task_from_json)
-            #ntasker_email.send_email(one_task_from_json, args[4])
+            ntasker_email.send_email(one_task_from_json, args[4])
             return
         else:
             return
     else:
         # False, task_name_from_calendar, tags, today, time_from_task, hashtah_time
-        task_syntax = str(args[1]) + " " + str(args[2]) + " " + str(args[3].lower()) + " " + str(args[4]) + " " + str(args[5])
+        task_syntax = str(args[1]) + " " + str(args[2]) + " " + str(args[3].lower()) + " " + str(args[4])
         value = added_tasks(args[1])
         if value is False:
-            print(task_syntax)
-            #ntasker_email.send_email(task_syntax, "")
+            ntasker_email.send_email(task_syntax, "")
             return
         else:
             return
 
+'''
+Calculate how long the task takes. This value is usage with Nozbe to settings the length of the task.
+Unfortunately, Nozbe does not understand the calculated time and must be changed.
+'''
 def subtracting_time(start_time, end_time):
     subtracting_time_result  = end_time - start_time
     STR_subtracting_time_result = str(subtracting_time_result)
