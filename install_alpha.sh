@@ -9,4 +9,3 @@ git init
 git pull https://github.com/DocBox12/ntasker.git
 chmod +x install.py
 chmod +x ./src/main.py
-rm install.sh
