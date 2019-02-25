@@ -30,6 +30,7 @@ def import_tasks_from_calendar(URL, timezone, tags, today, raw_data_from_json):
         start_date_from_task = task_details.begin.to(timezone).format('YYYYMMDD HH:mm') # Covert time for people
         raw_end_time = task_details.end.to(timezone) # End time task
         raw_start_time = task_details.begin.to(timezone) # Start time task
+        comment_from_calendar = task_details.description # Get description from task
 
         '''
         Unfortunately, Nozbe does not understand the calculated time and must be changed. See the subtracting_time function
@@ -66,7 +67,7 @@ def import_tasks_from_calendar(URL, timezone, tags, today, raw_data_from_json):
                 else:
                     continue
             else:
-                generate_syntax(False, task_name_from_calendar, tags, today, hashtah_time)
+                generate_syntax(False, task_name_from_calendar, tags, today, hashtah_time, comment_from_calendar)
             """
             If the task with calendar has a smaller date than it is currently:
             - search for a task in json file
@@ -118,11 +119,11 @@ def generate_syntax(*args):
         else:
             return
     else:
-        # False, task_name_from_calendar, tags, today, time_from_task, hashtah_time
+        # False, task_name_from_calendar, tags, today, time_from_task, hashtah_time, comment_from_calendar
         task_syntax = str(args[1]) + " " + str(args[2]) + " " + str(args[3].lower()) + " " + str(args[4])
         value = added_tasks(args[1])
         if value is False:
-            ntasker_email.send_email(task_syntax, "")
+            ntasker_email.send_email(task_syntax, args[5])
             return
         else:
             return
