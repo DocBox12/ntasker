@@ -54,6 +54,7 @@ timezone = config['Calendar']['Timezone']
 tags = config['Calendar']['Tags']
 
 today = config['Translation']['Today']
+tomorrow = config['Translation']['Tomorrow']
 
 parser = argparse.ArgumentParser()
 
@@ -64,6 +65,8 @@ parser.add_argument("--debug", help="Send tasks to nozbe without regardless day 
 parser.add_argument("--run", help="Run app.", action="store_true")
 
 parser.add_argument("--calendar", help="Import tasks from calendar and add to nozbe.", action="store_true")
+
+parser.add_argument("--nextday", help="Import tomorrow tasks from calendar and add to nozbe", action="store_true")
 
 args = parser.parse_args()
 
@@ -78,5 +81,10 @@ if args.run:
 
 if args.calendar:
     json_content = loading_json_file()
-    ntasker_calendar.import_tasks_from_calendar(ical_url, timezone, tags, today, json_content)
+    ntasker_calendar.import_tasks_from_calendar(ical_url, timezone, tags, today, json_content, False)
+
+if args.nextday:
+    json_content = loading_json_file()
+    today = tomorrow
+    ntasker_calendar.import_tasks_from_calendar(ical_url, timezone, tags, today, json_content, True)
 

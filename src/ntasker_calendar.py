@@ -10,12 +10,8 @@ import ntasker_email
 
 LIST_added = []
 
-def import_tasks_from_calendar(URL, timezone, tags, today, raw_data_from_json):
+def import_tasks_from_calendar(URL, timezone, tags, today, raw_data_from_json, next_day):
     
-    # It's used by Nozbe to set the task today's date.
-    if today == "":
-        today = "#Today"
-
     raw_url = Calendar(urlopen(URL).read().decode('utf-8'))
 
     raw_url = Calendar(requests.get(URL).text)
@@ -49,13 +45,19 @@ def import_tasks_from_calendar(URL, timezone, tags, today, raw_data_from_json):
         task_name_from_json = raw_data_from_json.get("Calendar")
         DICT_all_tasks = task_name_from_json[0]
 
-        today_is = (time.strftime("%Y%m%d"))
+        today_is = time.strftime("%Y%m%d")
         """
         If task from calendar has sameone date how than today:
         - search for a task in json file
         - if task is in json file, extract comment and send values to generate_syntax funtion
         - is task is not in json file, send values to generate_syntax_function
         """
+        
+        if next_day is True:
+            DATE_new_day = datetime.datetime.now() + datetime.timedelta(days=1)
+            STR_new_day = DATE_new_day.strftime("%Y%m%d")
+            today_is = STR_new_day
+
         if int(today_is) == int(details_date_from_task):
             for one_task_from_json in DICT_all_tasks:
                 if one_task_from_json.lower() == "___comment___":
@@ -114,6 +116,7 @@ def generate_syntax(*args):
         one_task_from_json = args[1] + " " + str(args[2]) + " " + str(args[3])
         value = added_tasks(args[1])
         if value is False:
+            print(one_task_from_json)
             ntasker_email.send_email(one_task_from_json, args[4])
             return
         else:
@@ -123,6 +126,7 @@ def generate_syntax(*args):
         task_syntax = str(args[1]) + " " + str(args[2]) + " " + str(args[3].lower()) + " " + str(args[4])
         value = added_tasks(args[1])
         if value is False:
+            print(task_syntax)
             ntasker_email.send_email(task_syntax, args[5])
             return
         else:
