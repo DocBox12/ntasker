@@ -64,11 +64,11 @@ parser.add_argument("--verify", help="Verify json file. If file have errors prog
 
 parser.add_argument("--debug", help="Send tasks to nozbe without regardless day of the week.", action="store_true")
 
-parser.add_argument("--run", help="Run app.", action="store_true")
+parser.add_argument("--run", help="Run app and send tasks to Nozbe only from json file.", action="store_true")
 
-parser.add_argument("--calendar", help="Import tasks from calendar and add to nozbe.", action="store_true")
+parser.add_argument("--importtoday", help="Import tasks from calendar and add to nozbe.", action="store_true")
 
-parser.add_argument("--nextday", help="Import tomorrow tasks from calendar and add to nozbe", action="store_true")
+parser.add_argument("--importnextday", help="Import tomorrow tasks from calendar and add to nozbe", action="store_true")
 
 parser.add_argument("--createdb", help="Create database", action="store_true")
 
@@ -85,11 +85,11 @@ if args.debug:
 if args.run:
     extract_task(False)
 
-if args.calendar:
+if args.importtoday:
     json_content = loading_json_file()
     ntasker_calendar.import_tasks_from_calendar(ical_url, timezone, tags, today, json_content, Add_start_time, False)
 
-if args.nextday:
+if args.importnextday:
     json_content = loading_json_file()
     today = tomorrow
     ntasker_calendar.import_tasks_from_calendar(ical_url, timezone, tags, today, json_content, Add_start_time, True)
