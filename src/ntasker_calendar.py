@@ -71,7 +71,7 @@ def import_tasks_from_calendar(URL, timezone, tags, today, raw_data_from_json, A
 
         generate_syntax(True, one_task_from_json, today, hashtah_time, comment
 
-        hashtah_time is after today
+        hashtah_time is after today 
         '''
         hashtah_time = subtracting_time(task_details.duration)
 
