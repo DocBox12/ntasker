@@ -8,8 +8,7 @@ from urllib.request import urlopen
 import datetime
 import ntasker_email
 from dateutil.rrule import rrulestr
-
-LIST_added = []
+import ntasker_sqlite
 
 
 def search_tasks(URL, timezone, next_day):
@@ -56,13 +55,16 @@ def import_tasks_from_calendar(URL, timezone, tags, today, raw_data_from_json, A
 
     for i in range(len(LIST_data_from_calendar)):
         task_details = LIST_data_from_calendar[i]
+        uid_task = task_details.uid
+        result_sql = ntasker_sqlite.search_task(uid_task)
+        if result_sql is True:
+            continue
         
         #### CALENDAR ###
         task_name_from_calendar = task_details.name # Get task name
         comment_from_calendar = task_details.description # Get description from task
         start_date_from_task = task_details.begin.to(timezone).format('HH:mm') # Covert time for people
-        print(start_date_from_task)
-
+        
         '''
         Unfortunately, Nozbe does not understand the calculated time and must be changed. See the subtracting_time function
         REMEMBER! Nozbe will set the length of the task only when it appears after the word Today. See instructions:
@@ -106,6 +108,7 @@ def import_tasks_from_calendar(URL, timezone, tags, today, raw_data_from_json, A
                 one_task_from_json = one_task_from_json + " " + str(today) + " " + str(start_date_for_json) + " " + str(hashtah_time)
                 print(one_task_from_json)
                 #ntasker_email.send_email(one_task_from_json, comment)
+                ntasker_sqlite.add_task(uid_task)
                 break
             else:
                 continue
@@ -113,6 +116,7 @@ def import_tasks_from_calendar(URL, timezone, tags, today, raw_data_from_json, A
             task_syntax = str(task_name_from_calendar) + " " + str(tags) + " " + str(today.lower()) + " " + str(start_date_for_calendar) + " " + str(hashtah_time)
             print(task_syntax)
             #ntasker_email.send_email(task_syntax, comment_from_calendar)
+            ntasker_sqlite.add_task(uid_task)
 
         
 

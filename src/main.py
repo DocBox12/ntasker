@@ -9,6 +9,7 @@ import sys
 import argparse
 import ntasker_calendar
 import ntasker_logs
+import ntasker_sqlite
 
 def extract_task(debug):
 
@@ -69,6 +70,10 @@ parser.add_argument("--calendar", help="Import tasks from calendar and add to no
 
 parser.add_argument("--nextday", help="Import tomorrow tasks from calendar and add to nozbe", action="store_true")
 
+parser.add_argument("--createdb", help="Create database", action="store_true")
+
+parser.add_argument("--cleardb", help="Remove all data from database", action="store_true")
+
 args = parser.parse_args()
 
 if args.verify:
@@ -88,4 +93,10 @@ if args.nextday:
     json_content = loading_json_file()
     today = tomorrow
     ntasker_calendar.import_tasks_from_calendar(ical_url, timezone, tags, today, json_content, Add_start_time, True)
+
+if args.createdb:
+    ntasker_sqlite.create_db()
+
+if args.cleardb:
+    ntasker_sqlite.remove_all()
 
