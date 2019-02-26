@@ -10,6 +10,7 @@ import argparse
 import ntasker_calendar
 import ntasker_logs
 import ntasker_sqlite
+import ntasker_new_version
 
 def extract_task(debug):
 
@@ -74,6 +75,10 @@ parser.add_argument("--createdb", help="Create database", action="store_true")
 
 parser.add_argument("--cleardb", help="Remove all data from database", action="store_true")
 
+parser.add_argument("--check_update", help="Checks if a new version of the program is available", action="store_true")
+
+parser.add_argument("--version", help="Show version", action="store_true")
+
 args = parser.parse_args()
 
 if args.verify:
@@ -100,3 +105,9 @@ if args.createdb:
 if args.cleardb:
     ntasker_sqlite.remove_all()
 
+if args.check_update:
+    ntasker_new_version.check_update()
+
+if args.version:
+    version = ntasker_new_version.check_version()
+    print(version)
