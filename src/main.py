@@ -55,6 +55,7 @@ tags = config['Calendar']['Tags']
 
 today = config['Translation']['Today']
 tomorrow = config['Translation']['Tomorrow']
+Add_start_time = config['Calendar']['Add_start_time']
 
 parser = argparse.ArgumentParser()
 
@@ -81,10 +82,10 @@ if args.run:
 
 if args.calendar:
     json_content = loading_json_file()
-    ntasker_calendar.import_tasks_from_calendar(ical_url, timezone, tags, today, json_content, False)
+    ntasker_calendar.import_tasks_from_calendar(ical_url, timezone, tags, today, json_content, Add_start_time, False)
 
 if args.nextday:
     json_content = loading_json_file()
     today = tomorrow
-    ntasker_calendar.import_tasks_from_calendar(ical_url, timezone, tags, today, json_content, True)
+    ntasker_calendar.import_tasks_from_calendar(ical_url, timezone, tags, today, json_content, Add_start_time, True)
 

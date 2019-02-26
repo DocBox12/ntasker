@@ -49,7 +49,7 @@ def search_tasks(URL, timezone, next_day):
 
     return LIST_with_tasks
 
-def import_tasks_from_calendar(URL, timezone, tags, today, raw_data_from_json, next_day):
+def import_tasks_from_calendar(URL, timezone, tags, today, raw_data_from_json, Add_start_time, next_day):
     
 
     LIST_data_from_calendar = search_tasks(URL, timezone, next_day)
@@ -77,6 +77,19 @@ def import_tasks_from_calendar(URL, timezone, tags, today, raw_data_from_json, n
         task_name_from_json = raw_data_from_json.get("Calendar")
         DICT_all_tasks = task_name_from_json[0]
 
+
+        if Add_start_time == "all":
+            start_date_for_json = start_date_from_task
+            start_date_for_calendar = start_date_from_task
+        elif Add_start_time == "json":
+            start_date_for_json = start_date_from_task
+            start_date_for_calendar = ""
+        elif Add_start_time == "calendar":
+            start_date_for_json = ""
+            start_date_for_calendar = start_date_from_task
+        else:
+            start_date_for_json = ""
+            start_date_for_calendar = ""
     
         """
         If task from calendar has sameone date how than today:
@@ -90,14 +103,14 @@ def import_tasks_from_calendar(URL, timezone, tags, today, raw_data_from_json, n
                 continue
             if one_task_from_json.lower() == task_name_from_calendar.lower():
                 comment = DICT_all_tasks.get(one_task_from_json)
-                one_task_from_json = one_task_from_json + " " + str(today) + " " + str(start_date_from_task) + " " + str(hashtah_time)
+                one_task_from_json = one_task_from_json + " " + str(today) + " " + str(start_date_for_json) + " " + str(hashtah_time)
                 print(one_task_from_json)
                 #ntasker_email.send_email(one_task_from_json, comment)
                 break
             else:
                 continue
         else:
-            task_syntax = str(task_name_from_calendar) + " " + str(tags) + " " + str(today.lower()) + " " + str(start_date_from_task) + " " + str(hashtah_time)
+            task_syntax = str(task_name_from_calendar) + " " + str(tags) + " " + str(today.lower()) + " " + str(start_date_for_calendar) + " " + str(hashtah_time)
             print(task_syntax)
             #ntasker_email.send_email(task_syntax, comment_from_calendar)
 
