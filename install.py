@@ -12,35 +12,13 @@ VERION_FILE_NAME = "VERSION.TXT"
 
 def update():
     execute_command = ("""
-                        git pull %s
-                        chmod +x ./src/main.py
+                        git pull
+                        chmod +x ./ntasker/main.py
                         chmod +x install.py
-                        """) % URL_REPOSITORY
+                        """) 
     
     os.system(execute_command)
     exit()
-
-
-def force_update():
-    execute_command = ("""
-                        git reset --hard
-                        git pull %s
-                        chmod +x ./src/main.py
-                        chmod +x install.py
-                        """) % URL_REPOSITORY
-
-    os.system(execute_command)
-    exit()
-
-def reset_app():
-    execute_command = ("""
-                        git reset --hard
-                        chmod +x ./src/main.py
-                        chmod +x install.py
-                        """)
-    os.system(execute_command)
-    exit()
-
 
 # Check local version
 def check_version():
@@ -78,15 +56,11 @@ def check_update(only_info):
     if local_version != latest_version:
         if only_info is True:
             return True
-        value = check_warning()
         print("Do you want to continue? [Y=YES] [N=NO]")
         while True:
             choose = input()
             if choose.upper() == "Y":
-                if value is True: # If warning run force
-                    force_update()
-                else:
-                    update()
+                update()
             elif choose.upper() == "N":
                 print("The update was interrupted at the user's request.")
                 exit()
@@ -121,17 +95,13 @@ if __name__ == "__main__":
 
     parser.add_argument("--check_update", help="Checks if a new version of the program is available, if it is offered by updates", action="store_true")
 
-    parser.add_argument("--force_update", help="It restores the state of the application to the official release and downloads the latest version from the server. All your settings will be deleted", action="store_true")
-
-    parser.add_argument("--reset", help="Returns the application to its original state. All your settings will be deleted", action="store_true")
+    parser.add_argument("--version", help="Show version.", action="store_true")    
 
     args = parser.parse_args()
     
-    if args.force_update:
-        force_update()
-    
-    if args.reset:
-        reset_app()
 
     if args.check_update:
         check_update(False)
+
+    if args.version():
+        check_version()
