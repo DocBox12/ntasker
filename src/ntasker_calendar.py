@@ -7,11 +7,22 @@ from ics import Calendar
 from urllib.request import urlopen
 import datetime
 import ntasker_email
+from dateutil.rrule import rrulestr
 
 LIST_added = []
 
-def import_tasks_from_calendar(URL, timezone, tags, today, raw_data_from_json, next_day):
-    
+
+def search_tasks(URL, timezone, next_day):
+
+    LIST_with_tasks = []
+
+    if next_day is True:
+        DATE_new_day = datetime.datetime.now() + datetime.timedelta(days=1)
+        STR_new_day = DATE_new_day.strftime("%Y%m%d")
+        today_is = STR_new_day
+    else:
+        today_is = time.strftime("%Y%m%d")    
+
     raw_url = Calendar(urlopen(URL).read().decode('utf-8'))
 
     raw_url = Calendar(requests.get(URL).text)
@@ -20,13 +31,37 @@ def import_tasks_from_calendar(URL, timezone, tags, today, raw_data_from_json, n
 
     for i in range(len(LIST_data_from_calendar)):
         task_details = LIST_data_from_calendar[i]
+        LIST_task_details = str(task_details).split("\n")
+        rrule_details = LIST_task_details[1]
+        if "RRULE" in rrule_details:
+            value = rrulestr(rrule_details)
+            rrule_data = value.after(datetime.datetime.now()).strftime("%Y%m%d")
+            if int(rrule_data) == int(today_is):
+                LIST_with_tasks.append(task_details)
+            else:
+                continue
+        else:
+            start_date_from_task = task_details.begin.to(timezone).format('YYYYMMDD') # Covert time for people
+            if int(today_is) == int(start_date_from_task):
+                LIST_with_tasks.append(task_details)
+            else:
+                continue
+
+    return LIST_with_tasks
+
+def import_tasks_from_calendar(URL, timezone, tags, today, raw_data_from_json, next_day):
+    
+
+    LIST_data_from_calendar = search_tasks(URL, timezone, next_day)
+
+    for i in range(len(LIST_data_from_calendar)):
+        task_details = LIST_data_from_calendar[i]
         
         #### CALENDAR ###
         task_name_from_calendar = task_details.name # Get task name
-        start_date_from_task = task_details.begin.to(timezone).format('YYYYMMDD HH:mm') # Covert time for people
-        raw_end_time = task_details.end.to(timezone) # End time task
-        raw_start_time = task_details.begin.to(timezone) # Start time task
         comment_from_calendar = task_details.description # Get description from task
+        start_date_from_task = task_details.begin.to(timezone).format('HH:mm') # Covert time for people
+        print(start_date_from_task)
 
         '''
         Unfortunately, Nozbe does not understand the calculated time and must be changed. See the subtracting_time function
@@ -36,109 +71,46 @@ def import_tasks_from_calendar(URL, timezone, tags, today, raw_data_from_json, n
 
         hashtah_time is after today
         '''
-        hashtah_time = subtracting_time(raw_start_time, raw_end_time)
-        
-        LIST_start_date_from_task = start_date_from_task.split(" ") # Split separate to date and time
-        details_date_from_task = LIST_start_date_from_task[0] # Assign date
+        hashtah_time = subtracting_time(task_details.duration)
 
         # Loading tasks from json file
         task_name_from_json = raw_data_from_json.get("Calendar")
         DICT_all_tasks = task_name_from_json[0]
 
-        today_is = time.strftime("%Y%m%d")
+    
         """
         If task from calendar has sameone date how than today:
         - search for a task in json file
         - if task is in json file, extract comment and send values to generate_syntax funtion
         - is task is not in json file, send values to generate_syntax_function
         """
-        
-        if next_day is True:
-            DATE_new_day = datetime.datetime.now() + datetime.timedelta(days=1)
-            STR_new_day = DATE_new_day.strftime("%Y%m%d")
-            today_is = STR_new_day
-
-        if int(today_is) == int(details_date_from_task):
-            for one_task_from_json in DICT_all_tasks:
-                if one_task_from_json.lower() == "___comment___":
-                    continue
-                if one_task_from_json.lower() == task_name_from_calendar.lower():
-                    comment = DICT_all_tasks.get(one_task_from_json)
-                    generate_syntax(True, one_task_from_json, today, hashtah_time, comment)
-                    break
-                else:
-                    continue
-            else:
-                generate_syntax(False, task_name_from_calendar, tags, today, hashtah_time, comment_from_calendar)
-            """
-            If the task with calendar has a smaller date than it is currently:
-            - search for a task in json file
-            - if task is in json, extract comment and send values to generate_syntax funtion
-            - if task is not in json, return to for i in range (len(LIST_data_from_calendar)):
-
-            This is used because DTSTART have date a first task created. This is big problem for repeat tasks.
-            The compare works on principle which date is smaller. If date from calendar is bigger than today it task is overlooked. 
-            In order for the dates to be compared, they are generated on the basis:
-
-            YYYYMMDD
-
-            This prevents adding a task from json, which was added to the calendar at a later date.
-            """
-        elif int(today_is) > int(details_date_from_task):
-            for one_task_from_json in DICT_all_tasks:
-                if one_task_from_json.lower() == task_name_from_calendar.lower():
-                    comment = DICT_all_tasks.get(one_task_from_json)
-                    generate_syntax(True, one_task_from_json, today, hashtah_time, comment)
-                    break
-                else:
-                    continue
-
-    return
-
-# Prevents adding the same task twice
-def added_tasks(task_name):
-    if len(LIST_added) == 0:
-        LIST_added.append(task_name.lower())
-        return False
-    else:
-        for i in range(len(LIST_added)):
-            value = LIST_added[i]
-            if task_name.lower() == value.lower():
-                return True
+    
+        for one_task_from_json in DICT_all_tasks:
+            if one_task_from_json.lower() == "___comment___":
+                continue
+            if one_task_from_json.lower() == task_name_from_calendar.lower():
+                comment = DICT_all_tasks.get(one_task_from_json)
+                one_task_from_json = one_task_from_json + " " + str(today) + " " + str(start_date_from_task) + " " + str(hashtah_time)
+                print(one_task_from_json)
+                #ntasker_email.send_email(one_task_from_json, comment)
+                break
             else:
                 continue
-        LIST_added.append(task_name.lower())
-        return False
-
-def generate_syntax(*args):
-    if args[0] is True:
-        # True, one_task_from_json, today, hashtah_tim, comment
-        one_task_from_json = args[1] + " " + str(args[2]) + " " + str(args[3])
-        value = added_tasks(args[1])
-        if value is False:
-            print(one_task_from_json)
-            ntasker_email.send_email(one_task_from_json, args[4])
-            return
         else:
-            return
-    else:
-        # False, task_name_from_calendar, tags, today, time_from_task, hashtah_time, comment_from_calendar
-        task_syntax = str(args[1]) + " " + str(args[2]) + " " + str(args[3].lower()) + " " + str(args[4])
-        value = added_tasks(args[1])
-        if value is False:
+            task_syntax = str(task_name_from_calendar) + " " + str(tags) + " " + str(today.lower()) + " " + str(start_date_from_task) + " " + str(hashtah_time)
             print(task_syntax)
-            ntasker_email.send_email(task_syntax, args[5])
-            return
-        else:
-            return
+            #ntasker_email.send_email(task_syntax, comment_from_calendar)
+
+        
+
+    return
 
 '''
 Calculate how long the task takes. This value is usage with Nozbe to settings the length of the task.
 Unfortunately, Nozbe does not understand the calculated time and must be changed.
 '''
-def subtracting_time(start_time, end_time):
-    subtracting_time_result  = end_time - start_time
-    STR_subtracting_time_result = str(subtracting_time_result)
+def subtracting_time(duration):
+    
     DICT_time = {
                     "0:05:00":"#5 min",
                     "0:10:00":"#10 min",
@@ -159,5 +131,5 @@ def subtracting_time(start_time, end_time):
                 }
 
     
-    time_hashtag = DICT_time.get(STR_subtracting_time_result)
+    time_hashtag = DICT_time.get(str(duration))
     return time_hashtag  
