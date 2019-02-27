@@ -44,6 +44,16 @@ def loading_json_file():
             print(error)
             ntasker_logs.save_logs(error)
             return
+
+
+
+def get_tags_for_calendar():
+    raw_data_from_json = loading_json_file()
+    LIST_tasks_from_json = raw_data_from_json.get("TagsForCalendar")
+    DICT_all_tasks = LIST_tasks_from_json[0]
+    hashtags = DICT_all_tasks.get("Tags")
+
+    return hashtags
             
 # Loading config
 config = configparser.RawConfigParser()
@@ -53,7 +63,6 @@ config.read(config_file)
 
 ical_url = config['Calendar']['ical_url']
 timezone = config['Calendar']['Timezone']
-tags = config['Calendar']['Tags']
 
 today = config['Translation']['Today']
 tomorrow = config['Translation']['Tomorrow']
@@ -92,12 +101,14 @@ if args.run:
 
 if args.importtoday:
     json_content = loading_json_file()
-    ntasker_calendar.import_tasks_from_calendar(ical_url, timezone, tags, today, json_content, Add_start_time, False)
+    hashtags = get_tags_for_calendar()
+    ntasker_calendar.import_tasks_from_calendar(ical_url, timezone, hashtags, today, json_content, Add_start_time, False)
 
 if args.importnextday:
     json_content = loading_json_file()
     today = tomorrow
-    ntasker_calendar.import_tasks_from_calendar(ical_url, timezone, tags, today, json_content, Add_start_time, True)
+    hashtags = get_tags_for_calendar()
+    ntasker_calendar.import_tasks_from_calendar(ical_url, timezone, hashtags, today, json_content, Add_start_time, True)
 
 if args.createdb:
     ntasker_sqlite.create_db()

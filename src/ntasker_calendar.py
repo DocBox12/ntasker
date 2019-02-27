@@ -105,7 +105,7 @@ def import_tasks_from_calendar(URL, timezone, tags, today, raw_data_from_json, A
                 continue
             if one_task_from_json.lower() == task_name_from_calendar.lower():
                 comment = DICT_all_tasks.get(one_task_from_json)
-                one_task_from_json = one_task_from_json + " " + str(today) + " " + str(start_date_for_json) + " " + str(hashtah_time)
+                one_task_from_json = one_task_from_json + " " + str(today.lower()) + " " + str(start_date_for_json) + " " + str(hashtah_time)
                 ntasker_email.send_email(one_task_from_json, comment)
                 ntasker_sqlite.add_task(uid_task)
                 break
