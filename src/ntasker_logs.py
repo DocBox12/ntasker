@@ -15,5 +15,18 @@ def save_logs(error):
         ef.write(str(error))
         ef.write("\n")
         ef.close()
-        exit()
+
+
+def save_events_app(event):
+    events_file = os.path.join(os.path.dirname(__file__), 'events.txt') 
+    if not os.path.exists(events_file):
+        open(events_file, "w+")
+
+    now_time = (time.strftime("%Y-%m-%d-%H:%M:%S"))
+    with open(events_file, 'a') as ef:
+        ef.write(str(now_time))
+        ef.write("\t")
+        ef.write(str(event))
+        ef.write("\n")
+        ef.close()
 

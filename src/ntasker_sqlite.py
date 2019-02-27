@@ -3,6 +3,7 @@
 
 import sqlite3
 import os
+import ntasker_logs
 
 
 db = os.path.join(os.path.dirname(__file__), 'ntasker_database.db')
@@ -34,7 +35,7 @@ def add_task(uid_task):
     c.execute(sql_exe)
     conn.commit()
     conn.close()
-
+    ntasker_logs.save_events_app("Add task to database")
     return
 
 
@@ -67,5 +68,6 @@ def remove_all():
     c.execute(sql_exe)
     conn.commit()
     conn.close()
+    ntasker_logs.save_events_app("Clear database")
     return
     

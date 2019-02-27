@@ -21,6 +21,7 @@ def send_email(topic, comment):
             connect_email.login(email_username, email_password)
             connect_email.send_message(email_message)
             connect_email.close()
+            ntasker_logs.save_events_app("Send mail")
             break
         except sys.exc_info()[0] as error:
             print(error)
