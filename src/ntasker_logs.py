@@ -2,6 +2,7 @@
 
 import os
 import time
+import datetime
 
 def save_logs(error):
     errors_file = os.path.join(os.path.dirname(__file__), 'errors.txt') 
@@ -30,3 +31,31 @@ def save_events_app(event):
         ef.write("\n")
         ef.close()
 
+def sent_emails(operation, number):
+
+    email_file = os.path.join(os.path.dirname(__file__), 'email.txt') 
+    if not os.path.exists(email_file):
+        open(email_file, "w+")
+
+
+    raw_create_time = os.path.getmtime(email_file)
+    human_create_time =  datetime.datetime.fromtimestamp(raw_create_time).strftime('%d')
+
+    today_is = time.strftime('%d')
+    if int(today_is) > int(human_create_time):
+        os.remove(email_file)
+        open(email_file, "w+")
+
+    if operation == "save":
+        with open(email_file, 'w') as ef:
+            ef.write(str(number))
+            ef.close()
+            return
+
+    if operation == "read":
+        with open(email_file, 'r') as ef:
+            email_number = ef.read()
+            if email_number == "":
+                email_number = 0
+
+            return email_number

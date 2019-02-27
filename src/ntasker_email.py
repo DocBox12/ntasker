@@ -8,6 +8,14 @@ import os
 import configparser
 
 def send_email(topic, comment):
+    value = ntasker_logs.sent_emails("read", "")
+    if int(value) == int(max_emails):
+        error = "Exhausted email limit"
+        ntasker_logs.save_logs(error)
+        return
+    else:
+        new_value = int(value) + 1
+        
     email_message = EmailMessage()
     email_message['Subject'] = str(topic)
     email_message['From'] = str(email_username)
@@ -21,6 +29,7 @@ def send_email(topic, comment):
             connect_email.login(email_username, email_password)
             connect_email.send_message(email_message)
             connect_email.close()
+            value = ntasker_logs.sent_emails("save", str(new_value))
             ntasker_logs.save_events_app("Send mail")
             break
         except sys.exc_info()[0] as error:
@@ -45,3 +54,4 @@ email_username = config['Email']['username']
 email_password = config['Email']['password']
 email_port = config['Email']['port']
 email_address = config['Email']['address']
+max_emails = config['Email']['max_emails']
