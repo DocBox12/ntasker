@@ -33,11 +33,10 @@ def send_email(topic, comment):
             ntasker_logs.save_events_app("Send mail")
             break
         except sys.exc_info()[0] as error:
-            print(error)
             ntasker_logs.save_logs(error)
             i+=1
             if i == 3:
-                exit()
+                return
             else:
                 continue
 

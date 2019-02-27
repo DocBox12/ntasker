@@ -4,6 +4,7 @@
 import sqlite3
 import os
 import ntasker_logs
+import sys
 
 
 db = os.path.join(os.path.dirname(__file__), 'ntasker_database.db')
@@ -30,31 +31,35 @@ def add_task(uid_task):
                 VALUES("%s");
             """) % str(uid_task)
 
-    conn = sqlite3.connect(db)
-    c = conn.cursor()
-    c.execute(sql_exe)
-    conn.commit()
-    conn.close()
-    ntasker_logs.save_events_app("Add task to database")
-    return
-
-
+    try:
+        conn = sqlite3.connect(db)
+        c = conn.cursor()
+        c.execute(sql_exe)
+        conn.commit()
+        conn.close()
+        ntasker_logs.save_events_app("Add task to database")
+        return
+    except sys.exc_info()[0] as error:
+        ntasker_logs.save_logs(error)
+        return
 
 def search_task(uid_task):
     sql_exe = ("""
                 select * FROM ntasker
                 where Details="%s";
             """) % str(uid_task)
-            
-    conn = sqlite3.connect(db)
-    c = conn.cursor()
-    c.execute(sql_exe)
-    
-    raw_data_from_sql = c.fetchall()
-    if len(raw_data_from_sql) == 0:
-        return False
-    else:
-        return True
+    try:
+        conn = sqlite3.connect(db)
+        c = conn.cursor()
+        c.execute(sql_exe)
+        raw_data_from_sql = c.fetchall()
+        if len(raw_data_from_sql) == 0:
+            return False
+        else:
+            return True
+    except sys.exc_info()[0] as error:
+        ntasker_logs.save_logs(error)
+        return True    
 
 
 
