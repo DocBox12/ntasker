@@ -54,6 +54,20 @@ def get_tags_for_calendar():
     hashtags = DICT_all_tasks.get("Tags")
 
     return hashtags
+
+def import_today_flag():
+    json_content = loading_json_file()
+    hashtags = get_tags_for_calendar()
+    ntasker_calendar.import_tasks_from_calendar(ical_url, timezone, hashtags, today, json_content, Add_start_time, False)
+    
+    return
+
+def import_next_day_flag():
+    json_content = loading_json_file()
+    today = tomorrow
+    hashtags = get_tags_for_calendar()
+    ntasker_calendar.import_tasks_from_calendar(ical_url, timezone, hashtags, today, json_content, Add_start_time, True)
+    return
             
 # Loading config
 config = configparser.RawConfigParser()
@@ -100,15 +114,10 @@ if args.run:
     extract_task(False)
 
 if args.importtoday:
-    json_content = loading_json_file()
-    hashtags = get_tags_for_calendar()
-    ntasker_calendar.import_tasks_from_calendar(ical_url, timezone, hashtags, today, json_content, Add_start_time, False)
+   import_today_flag()
 
 if args.importnextday:
-    json_content = loading_json_file()
-    today = tomorrow
-    hashtags = get_tags_for_calendar()
-    ntasker_calendar.import_tasks_from_calendar(ical_url, timezone, hashtags, today, json_content, Add_start_time, True)
+    import_next_day_flag()
 
 if args.createdb:
     ntasker_sqlite.create_db()
