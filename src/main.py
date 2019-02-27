@@ -34,8 +34,6 @@ def extract_task(debug):
     return
 
 def loading_json_file():
-    tasks_json = os.path.join(os.path.dirname(__file__), 'tasks.json')
-
     try:
         with open(tasks_json) as tf:
             raw_data_from_json = json.load(tf)
@@ -81,6 +79,8 @@ timezone = config['Calendar']['Timezone']
 today = config['Translation']['Today']
 tomorrow = config['Translation']['Tomorrow']
 Add_start_time = config['Calendar']['Add_start_time']
+
+tasks_json = config['JSON']['json_localization']
 
 parser = argparse.ArgumentParser()
 
