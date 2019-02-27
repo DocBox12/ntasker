@@ -12,6 +12,7 @@ def install():
     ./bin/pip3 install ics
     git clone https://github.com/DocBox12/ntasker.git
     chmod +x ./ntasker/src/main.py
+    chmod +x ./ntasker/src/ntasker_cron.py
     """)
 
     os.system(exe)
