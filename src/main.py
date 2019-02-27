@@ -98,6 +98,8 @@ parser.add_argument("--createdb", help="Create database", action="store_true")
 
 parser.add_argument("--cleardb", help="Remove all data from database", action="store_true")
 
+parser.add_argument("--remove_logs", help="Remove all log files.", action="store_true")
+
 parser.add_argument("--check_update", help="Checks if a new version of the program is available", action="store_true")
 
 parser.add_argument("--version", help="Show version", action="store_true")
@@ -131,3 +133,6 @@ if args.check_update:
 if args.version:
     version = ntasker_new_version.check_version()
     print(version)
+
+if args.remove_logs:
+    ntasker_logs.remove_all_logs()

@@ -4,8 +4,11 @@ import os
 import time
 import datetime
 
+errors_file = os.path.join(os.path.dirname(__file__), 'errors.txt') 
+events_file = os.path.join(os.path.dirname(__file__), 'events.txt') 
+email_file = os.path.join(os.path.dirname(__file__), 'email.txt') 
+
 def save_logs(error):
-    errors_file = os.path.join(os.path.dirname(__file__), 'errors.txt') 
     if not os.path.exists(errors_file):
         open(errors_file, "w+")
 
@@ -19,7 +22,6 @@ def save_logs(error):
 
 
 def save_events_app(event):
-    events_file = os.path.join(os.path.dirname(__file__), 'events.txt') 
     if not os.path.exists(events_file):
         open(events_file, "w+")
 
@@ -33,7 +35,6 @@ def save_events_app(event):
 
 def sent_emails(operation, number):
 
-    email_file = os.path.join(os.path.dirname(__file__), 'email.txt') 
     if not os.path.exists(email_file):
         open(email_file, "w+")
 
@@ -59,3 +60,12 @@ def sent_emails(operation, number):
                 email_number = 0
 
             return email_number
+
+def remove_all_logs():
+    if os.path.exists(errors_file):
+        os.remove(errors_file)
+    if os.path.exists(events_file):
+        os.remove(events_file)
+    if os.path.exists(email_file):
+        os.remove(email_file)
+    return
