@@ -160,7 +160,7 @@ def import_tasks_from_calendar(URL, timezone, tags, today, raw_data_from_json, A
             else:
                 continue
         else:
-            task_syntax = str(task_name_from_calendar_from_dict) + " " + str(tags) + " " + str(today.lower()) + " " + str(start_date_for_calendar) + " " + str(hashtah_time
+            task_syntax = str(task_name_from_calendar_from_dict) + " " + str(tags) + " " + str(today.lower()) + " " + str(start_date_for_calendar) + " " + str(hashtah_time)
             ntasker_email.send_email(task_syntax, comment_from_calendar_from_dict)
             if result_sql is None:
                 ntasker_sqlite.add_task(uid_task, dtstart_from_dict, sequence_number_from_dict)
