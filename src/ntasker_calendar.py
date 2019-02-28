@@ -30,21 +30,23 @@ def search_tasks(URL, timezone, next_day):
 
     for i in range(len(LIST_data_from_calendar)):
         task_details = LIST_data_from_calendar[i]
-        start_date_from_task = task_details.begin.to(timezone).format('YYYYMMDD') # Covert time 
+        start_date_from_task = task_details.begin.to(timezone).format('YYYYMMDD') # Covert time for humans
 
         if int(today_is) == int(start_date_from_task):
             LIST_with_tasks.append(task_details)
             continue
 
+
         LIST_task_details = str(task_details).split("\n")
-        rrule_details = LIST_task_details[1]
-        if "RRULE" in rrule_details:
-            value = rrulestr(rrule_details)
-            rrule_data = value.after(datetime.datetime.now()).strftime("%Y%m%d")
-            if int(rrule_data) == int(today_is):
-                LIST_with_tasks.append(task_details)
-            else:
-                continue
+        for j in range(len(LIST_task_details)):
+            if "RRULE" in LIST_task_details[j]:
+                rrule_details = LIST_task_details[j]
+                value = rrulestr(rrule_details)
+                rrule_data = value.after(datetime.datetime.now()).strftime("%Y%m%d")
+                if int(rrule_data) == int(today_is):
+                    LIST_with_tasks.append(task_details)
+                else:
+                    continue
 
     return LIST_with_tasks
 
@@ -52,19 +54,63 @@ def import_tasks_from_calendar(URL, timezone, tags, today, raw_data_from_json, A
     
 
     LIST_data_from_calendar = search_tasks(URL, timezone, next_day)
+    DICT_sequence = {}
+    DICT_dtstart = {}
+    DICT_task_name = {}
+    DICT_comment = {}
+    DICT_start_date_from_task = {}
 
     for i in range(len(LIST_data_from_calendar)):
         task_details = LIST_data_from_calendar[i]
-        uid_task = task_details.uid
-        dt_start = task_details.begin.to(timezone).format('YYYYMMDDHHmm')
-        result_sql = ntasker_sqlite.search_task(uid_task, dt_start)
-        if result_sql is True:
-            continue
-        
-        #### CALENDAR ###
+
+
         task_name_from_calendar = task_details.name # Get task name
+        uid_task = task_details.uid 
         comment_from_calendar = task_details.description # Get description from task
         start_date_from_task = task_details.begin.to(timezone).format('HH:mm') # Covert time for people
+
+
+
+        dt_start = task_details.begin.to(timezone).format('YYYYMMDDHHmm')
+        LIST_task_details = str(task_details).split("\n")
+        for j in range(len(LIST_task_details)):
+            if "SEQUENCE" in LIST_task_details[j]:
+                sequence = LIST_task_details[j]
+                LIST_sequence = sequence.split(":")
+                sequence_number = LIST_sequence[1]
+
+                currently_sequence = DICT_sequence.get(uid_task)
+                if currently_sequence is None or int(currently_sequence) > int(sequence_number):
+                    # UID and sequence
+                    DICT_sequence.update({uid_task:int(sequence_number)})  
+                
+                # UID and task name from calendar
+                DICT_task_name.update({uid_task:task_name_from_calendar})
+
+                # UID and comment from task
+                DICT_comment.update({uid_task:comment_from_calendar})
+
+                # UID and sequence
+                DICT_sequence.update({uid_task:int(sequence_number)})
+
+                # UID and DTSTART
+                DICT_dtstart.update({uid_task:dt_start})
+
+                # UID and start_date_from_task
+                DICT_start_date_from_task.update({uid_task:start_date_from_task})
+
+
+    for uid_task in DICT_sequence:
+        dtstart_from_dict = DICT_dtstart.get(uid_task)
+        sequence_number_from_dict = DICT_sequence.get(uid_task)
+        task_name_from_calendar_from_dict = DICT_task_name.get(uid_task)
+        comment_from_calendar_from_dict = DICT_comment.get(uid_task) 
+        start_date_from_task_from_dict = DICT_start_date_from_task.get(uid_task)
+
+        result_sql = ntasker_sqlite.search_task(uid_task, dtstart_from_dict, sequence_number_from_dict)
+        if result_sql is True:
+            continue
+    
         
         '''
         Unfortunately, Nozbe does not understand the calculated time and must be changed. See the subtracting_time function
@@ -82,14 +128,14 @@ def import_tasks_from_calendar(URL, timezone, tags, today, raw_data_from_json, A
 
 
         if Add_start_time == "all":
-            start_date_for_json = start_date_from_task
-            start_date_for_calendar = start_date_from_task
+            start_date_for_json = start_date_from_task_from_dict
+            start_date_for_calendar = start_date_from_task_from_dict
         elif Add_start_time == "json":
-            start_date_for_json = start_date_from_task
+            start_date_for_json = start_date_from_task_from_dict
             start_date_for_calendar = ""
         elif Add_start_time == "calendar":
             start_date_for_json = ""
-            start_date_for_calendar = start_date_from_task
+            start_date_for_calendar = start_date_from_task_from_dict
         else:
             start_date_for_json = ""
             start_date_for_calendar = ""
@@ -107,17 +153,17 @@ def import_tasks_from_calendar(URL, timezone, tags, today, raw_data_from_json, A
             if one_task_from_json.lower() == task_name_from_calendar.lower():
                 comment = DICT_all_tasks.get(one_task_from_json)
                 one_task_from_json = one_task_from_json + " " + str(today.lower()) + " " + str(start_date_for_json) + " " + str(hashtah_time)
-                print(one_task_from_json)
-                #ntasker_email.send_email(one_task_from_json, comment)
-                ntasker_sqlite.add_task(uid_task, dt_start)
+                ntasker_email.send_email(one_task_from_json, comment)
+                if result_sql is None:
+                    ntasker_sqlite.add_task(uid_task, dtstart_from_dict, sequence_number_from_dict)
                 break
             else:
                 continue
         else:
-            task_syntax = str(task_name_from_calendar) + " " + str(tags) + " " + str(today.lower()) + " " + str(start_date_for_calendar) + " " + str(hashtah_time)
-            print(task_syntax)
-            #ntasker_email.send_email(task_syntax, comment_from_calendar)
-            ntasker_sqlite.add_task(uid_task, dt_start)
+            task_syntax = str(task_name_from_calendar_from_dict) + " " + str(tags) + " " + str(today.lower()) + " " + str(start_date_for_calendar) + " " + str(hashtah_time
+            ntasker_email.send_email(task_syntax, comment_from_calendar_from_dict)
+            if result_sql is None:
+                ntasker_sqlite.add_task(uid_task, dtstart_from_dict, sequence_number_from_dict)
 
         
 

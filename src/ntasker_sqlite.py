@@ -15,7 +15,8 @@ def create_db():
             CREATE TABLE `ntasker` (
         	`ID`	INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,
 	        `ical`	TEXT,
-            'dtstart' TEXT
+            'dtstart' TEXT,
+            'sequence' INT
                                     );
             """)
 
@@ -27,15 +28,14 @@ def create_db():
     conn.close()
     return
 
-def add_task(uid_task, dtstart):
-
+def add_task(uid_task, dtstart, sequence):
     uid_task = ntasker_hash.hash(uid_task)
     dtstart = ntasker_hash.hash(dtstart)
 
     sql_exe = ("""
-                insert into ntasker (ical, dtstart)
-                VALUES("%s", "%s");
-            """) % (str(uid_task), str(dtstart))
+                insert into ntasker (ical, dtstart, sequence)
+                VALUES("%s", "%s", "%s");
+            """) % (str(uid_task), str(dtstart), int(sequence))
 
     try:
         conn = sqlite3.connect(db)
@@ -49,10 +49,9 @@ def add_task(uid_task, dtstart):
         ntasker_logs.save_logs(error)
         return
 
-def search_task(uid_task, dt_start):
-
+def search_task(uid_task, dtstart, sequence):
     uid_task = ntasker_hash.hash(uid_task)
-    dt_start = ntasker_hash.hash(dt_start)
+    dtstart = ntasker_hash.hash(dtstart)
 
     sql_exe = ("""
                 select * FROM ntasker
@@ -64,24 +63,66 @@ def search_task(uid_task, dt_start):
         c.execute(sql_exe)
         raw_data_from_sql = c.fetchall()
         if len(raw_data_from_sql) == 0:
-            return False
+            return None
         else:
             LIST_information_about_task  = raw_data_from_sql[0]
-            dt_start_from_sql = LIST_information_about_task[2]
-            if str(dt_start) == str(dt_start_from_sql):
-                return True
-            else:
-                remove_task(uid_task)
+            sequence_from_sql = LIST_information_about_task[3]
+
+            if int(sequence) > int(sequence_from_sql):
+                update_sequence(uid_task, sequence)
+                update_dtstart(uid_task, dtstart)
                 return False
+            else:
+                return True     
     except sys.exc_info()[0] as error:
         ntasker_logs.save_logs(error)
-        return True    
+        return True   
+
+def update_dtstart(uid_task, dtstart):
+    sql_exe = ("""
+                    update ntasker
+                    set dtstart="%s"
+                    where ical="%s";
+                """) % (str(dtstart), str(uid_task)) 
+
+    try:
+        conn = sqlite3.connect(db)
+        c = conn.cursor()
+        c.execute(sql_exe)
+        conn.commit()
+        conn.close()
+        ntasker_logs.save_events_app("Update dtstart for task in database.")
+        return 
+    except sys.exc_info()[0] as error:
+        ntasker_logs.save_logs(error)
+        return  
+
+
+
+def update_sequence(uid_task, sequence):
+    sql_exe = ("""
+                update ntasker
+                set sequence="%s"
+                where ical="%s";
+            """) % (int(sequence), str(uid_task))
+
+    try:
+        conn = sqlite3.connect(db)
+        c = conn.cursor()
+        c.execute(sql_exe)
+        conn.commit()
+        conn.close()
+        ntasker_logs.save_events_app("Update sequence for task in database.")
+        return True
+    except sys.exc_info()[0] as error:
+        ntasker_logs.save_logs(error)
+        return False
+
+    return 
 
 def remove_task(uid_task):
-
-    uid_task = ntasker_hash.hash(uid_task)
-
     sql_exe = ("""
+
                 DELETE FROM ntasker where ical='%s';
             """) % (str(uid_task))
     try:
