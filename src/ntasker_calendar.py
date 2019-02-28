@@ -30,18 +30,18 @@ def search_tasks(URL, timezone, next_day):
 
     for i in range(len(LIST_data_from_calendar)):
         task_details = LIST_data_from_calendar[i]
+        start_date_from_task = task_details.begin.to(timezone).format('YYYYMMDD') # Covert time 
+
+        if int(today_is) == int(start_date_from_task):
+            LIST_with_tasks.append(task_details)
+            continue
+
         LIST_task_details = str(task_details).split("\n")
         rrule_details = LIST_task_details[1]
         if "RRULE" in rrule_details:
             value = rrulestr(rrule_details)
             rrule_data = value.after(datetime.datetime.now()).strftime("%Y%m%d")
             if int(rrule_data) == int(today_is):
-                LIST_with_tasks.append(task_details)
-            else:
-                continue
-        else:
-            start_date_from_task = task_details.begin.to(timezone).format('YYYYMMDD') # Covert time for people
-            if int(today_is) == int(start_date_from_task):
                 LIST_with_tasks.append(task_details)
             else:
                 continue
@@ -56,7 +56,8 @@ def import_tasks_from_calendar(URL, timezone, tags, today, raw_data_from_json, A
     for i in range(len(LIST_data_from_calendar)):
         task_details = LIST_data_from_calendar[i]
         uid_task = task_details.uid
-        result_sql = ntasker_sqlite.search_task(uid_task)
+        dt_start = task_details.begin.to(timezone).format('YYYYMMDDHHmm')
+        result_sql = ntasker_sqlite.search_task(uid_task, dt_start)
         if result_sql is True:
             continue
         
@@ -106,15 +107,17 @@ def import_tasks_from_calendar(URL, timezone, tags, today, raw_data_from_json, A
             if one_task_from_json.lower() == task_name_from_calendar.lower():
                 comment = DICT_all_tasks.get(one_task_from_json)
                 one_task_from_json = one_task_from_json + " " + str(today.lower()) + " " + str(start_date_for_json) + " " + str(hashtah_time)
-                ntasker_email.send_email(one_task_from_json, comment)
-                ntasker_sqlite.add_task(uid_task)
+                print(one_task_from_json)
+                #ntasker_email.send_email(one_task_from_json, comment)
+                ntasker_sqlite.add_task(uid_task, dt_start)
                 break
             else:
                 continue
         else:
             task_syntax = str(task_name_from_calendar) + " " + str(tags) + " " + str(today.lower()) + " " + str(start_date_for_calendar) + " " + str(hashtah_time)
-            ntasker_email.send_email(task_syntax, comment_from_calendar)
-            ntasker_sqlite.add_task(uid_task)
+            print(task_syntax)
+            #ntasker_email.send_email(task_syntax, comment_from_calendar)
+            ntasker_sqlite.add_task(uid_task, dt_start)
 
         
 
