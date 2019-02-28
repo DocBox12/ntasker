@@ -46,6 +46,8 @@ def sent_emails(operation, number):
     if int(today_is) > int(human_create_time):
         os.remove(email_file)
         open(email_file, "w+")
+        if number != 1:
+            number = 1
 
     if operation == "save":
         with open(email_file, 'w') as ef:
