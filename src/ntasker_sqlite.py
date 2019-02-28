@@ -5,6 +5,7 @@ import sqlite3
 import os
 import ntasker_logs
 import sys
+import ntasker_hash
 
 
 db = os.path.join(os.path.dirname(__file__), 'ntasker_database.db')
@@ -27,6 +28,10 @@ def create_db():
     return
 
 def add_task(uid_task, dtstart):
+
+    uid_task = ntasker_hash.hash(uid_task)
+    dtstart = ntasker_hash.hash(dtstart)
+
     sql_exe = ("""
                 insert into ntasker (ical, dtstart)
                 VALUES("%s", "%s");
@@ -45,6 +50,10 @@ def add_task(uid_task, dtstart):
         return
 
 def search_task(uid_task, dt_start):
+
+    uid_task = ntasker_hash.hash(uid_task)
+    dt_start = ntasker_hash.hash(dt_start)
+
     sql_exe = ("""
                 select * FROM ntasker
                 where ical="%s";
@@ -69,6 +78,9 @@ def search_task(uid_task, dt_start):
         return True    
 
 def remove_task(uid_task):
+
+    uid_task = ntasker_hash.hash(uid_task)
+
     sql_exe = ("""
                 DELETE FROM ntasker where ical='%s';
             """) % (str(uid_task))
