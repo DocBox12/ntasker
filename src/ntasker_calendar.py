@@ -54,6 +54,7 @@ def import_tasks_from_calendar(URL, timezone, tags, today, raw_data_from_json, A
     
 
     LIST_data_from_calendar = search_tasks(URL, timezone, next_day)
+    DICT_general_tasks = {}
     DICT_sequence = {}
     DICT_dtstart = {}
     DICT_task_name = {}
@@ -80,29 +81,39 @@ def import_tasks_from_calendar(URL, timezone, tags, today, raw_data_from_json, A
                 LIST_sequence = sequence.split(":")
                 sequence_number = LIST_sequence[1]
 
-                currently_sequence = DICT_sequence.get(uid_task)
-                if currently_sequence is None or int(currently_sequence) > int(sequence_number):
+
+                uid_from_DICT = DICT_general_tasks.get(uid_task)
+                if uid_from_DICT is None:
+                    DICT_general_tasks.update({uid_task:task_name_from_calendar})
                     # UID and sequence
                     DICT_sequence.update({uid_task:int(sequence_number)})  
                 
-                # UID and task name from calendar
-                DICT_task_name.update({uid_task:task_name_from_calendar})
+                    # UID and task name from calendar
+                    DICT_task_name.update({uid_task:task_name_from_calendar})
 
-                # UID and comment from task
-                DICT_comment.update({uid_task:comment_from_calendar})
+                    # UID and comment from task
+                    DICT_comment.update({uid_task:comment_from_calendar})
 
-                # UID and sequence
-                DICT_sequence.update({uid_task:int(sequence_number)})
+                    # UID and sequence
+                    DICT_sequence.update({uid_task:int(sequence_number)})
 
-                # UID and DTSTART
-                DICT_dtstart.update({uid_task:dt_start})
+                    # UID and DTSTART
+                    DICT_dtstart.update({uid_task:dt_start})
 
-                # UID and start_date_from_task
-                DICT_start_date_from_task.update({uid_task:start_date_from_task})
+                    # UID and start_date_from_task
+                    DICT_start_date_from_task.update({uid_task:start_date_from_task})
 
-                # UID and task duration
-                DICT_task_duration.update({uid_task:task_duration_from_calendar})
-
+                    # UID and task duration
+                    DICT_task_duration.update({uid_task:task_duration_from_calendar})
+                else:
+                    currently_sequence = DICT_sequence.get(uid_task)
+                    if int(currently_sequence) > int(sequence_number):
+                        # UID and DTSTART
+                        DICT_dtstart.update({uid_task:dt_start})
+                        # UID and sequence
+                        DICT_sequence.update({uid_task:int(sequence_number)})
+                        # UID and task duration
+                        DICT_task_duration.update({uid_task:task_duration_from_calendar})
 
     for uid_task in DICT_sequence:
         dtstart_from_dict = DICT_dtstart.get(uid_task)
@@ -155,7 +166,7 @@ def import_tasks_from_calendar(URL, timezone, tags, today, raw_data_from_json, A
         for one_task_from_json in DICT_all_tasks:
             if one_task_from_json.lower() == "___comment___":
                 continue
-            if one_task_from_json.lower() == task_name_from_calendar.lower():
+            if one_task_from_json.lower() == task_name_from_calendar_from_dict.lower():
                 comment = DICT_all_tasks.get(one_task_from_json)
                 one_task_from_json = one_task_from_json + " " + str(today.lower()) + " " + str(start_date_for_json) + " " + str(hashtah_time)
                 ntasker_email.send_email(one_task_from_json, comment)
