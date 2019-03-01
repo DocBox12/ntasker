@@ -40,9 +40,9 @@ def sent_emails(operation, number):
 
 
     raw_create_time = os.path.getmtime(email_file)
-    human_create_time =  datetime.datetime.fromtimestamp(raw_create_time).strftime('%d')
+    human_create_time =  datetime.datetime.fromtimestamp(raw_create_time).strftime('%Y%m%d')
 
-    today_is = time.strftime('%d')
+    today_is = time.strftime('%Y%m%d')
     if int(today_is) > int(human_create_time):
         os.remove(email_file)
         open(email_file, "w+")
