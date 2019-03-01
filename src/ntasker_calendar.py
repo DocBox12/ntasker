@@ -59,6 +59,7 @@ def import_tasks_from_calendar(URL, timezone, tags, today, raw_data_from_json, A
     DICT_task_name = {}
     DICT_comment = {}
     DICT_start_date_from_task = {}
+    DICT_task_duration = {}
 
     for i in range(len(LIST_data_from_calendar)):
         task_details = LIST_data_from_calendar[i]
@@ -68,7 +69,7 @@ def import_tasks_from_calendar(URL, timezone, tags, today, raw_data_from_json, A
         uid_task = task_details.uid 
         comment_from_calendar = task_details.description # Get description from task
         start_date_from_task = task_details.begin.to(timezone).format('HH:mm') # Covert time for people
-
+        task_duration_from_calendar = task_details.duration
 
 
         dt_start = task_details.begin.to(timezone).format('YYYYMMDDHHmm')
@@ -99,6 +100,9 @@ def import_tasks_from_calendar(URL, timezone, tags, today, raw_data_from_json, A
                 # UID and start_date_from_task
                 DICT_start_date_from_task.update({uid_task:start_date_from_task})
 
+                # UID and task duration
+                DICT_task_duration.update({uid_task:task_duration_from_calendar})
+
 
     for uid_task in DICT_sequence:
         dtstart_from_dict = DICT_dtstart.get(uid_task)
@@ -106,6 +110,7 @@ def import_tasks_from_calendar(URL, timezone, tags, today, raw_data_from_json, A
         task_name_from_calendar_from_dict = DICT_task_name.get(uid_task)
         comment_from_calendar_from_dict = DICT_comment.get(uid_task) 
         start_date_from_task_from_dict = DICT_start_date_from_task.get(uid_task)
+        task_duration_from_calendar_from_dict = DICT_task_duration.get(uid_task)
 
         result_sql = ntasker_sqlite.search_task(uid_task, dtstart_from_dict, sequence_number_from_dict)
         if result_sql is True:
@@ -120,7 +125,7 @@ def import_tasks_from_calendar(URL, timezone, tags, today, raw_data_from_json, A
 
         hashtah_time is after today 
         '''
-        hashtah_time = subtracting_time(task_details.duration)
+        hashtah_time = subtracting_time(task_duration_from_calendar_from_dict)
 
         # Loading tasks from json file
         task_name_from_json = raw_data_from_json.get("Calendar")
