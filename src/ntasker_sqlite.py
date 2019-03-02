@@ -49,7 +49,7 @@ def add_task(uid_task, dtstart, sequence):
         ntasker_logs.save_logs(error)
         return
 
-def search_task(uid_task, dtstart, sequence):
+def search_task(uid_task, dtstart, sequence, rrule):
     uid_task = ntasker_hash.hash(uid_task)
     dtstart = ntasker_hash.hash(dtstart)
 
@@ -66,6 +66,7 @@ def search_task(uid_task, dtstart, sequence):
             return None
         else:
             LIST_information_about_task  = raw_data_from_sql[0]
+            start_time_from_sql = LIST_information_about_task[2]
             sequence_from_sql = LIST_information_about_task[3]
 
             if int(sequence) > int(sequence_from_sql):
@@ -73,6 +74,10 @@ def search_task(uid_task, dtstart, sequence):
                 update_dtstart(uid_task, dtstart)
                 return False
             else:
+                if rrule is True:
+                    if int(dtstart) > int(start_time_from_sql):
+                        update_dtstart(uid_task, dtstart)
+                        return False
                 return True     
     except sys.exc_info()[0] as error:
         ntasker_logs.save_logs(error)

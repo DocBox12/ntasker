@@ -123,7 +123,7 @@ def import_tasks_from_calendar(URL, timezone, tags, today, raw_data_from_json, A
         start_date_from_task_from_dict = DICT_start_date_from_task.get(uid_task)
         task_duration_from_calendar_from_dict = DICT_task_duration.get(uid_task)
 
-        result_sql = ntasker_sqlite.search_task(uid_task, dtstart_from_dict, sequence_number_from_dict)
+        result_sql = ntasker_sqlite.search_task(uid_task, dtstart_from_dict, sequence_number_from_dict, False)
         if result_sql is True:
             continue
     
@@ -167,11 +167,14 @@ def import_tasks_from_calendar(URL, timezone, tags, today, raw_data_from_json, A
             if one_task_from_json.lower() == "___comment___":
                 continue
             if one_task_from_json.lower() == task_name_from_calendar_from_dict.lower():
+                result_sql = ntasker_sqlite.search_task(uid_task, dtstart_from_dict, sequence_number_from_dict, True)
+                if result_sql is True:
+                    continue 
                 comment = DICT_all_tasks.get(one_task_from_json)
                 one_task_from_json = one_task_from_json + " " + str(today.lower()) + " " + str(start_date_for_json) + " " + str(hashtah_time)
                 ntasker_email.send_email(one_task_from_json, comment)
-                #if result_sql is None:
-                #    ntasker_sqlite.add_task(uid_task, dtstart_from_dict, sequence_number_from_dict)
+                if result_sql is None:
+                    ntasker_sqlite.add_task(uid_task, dtstart_from_dict, sequence_number_from_dict)
                 break
             else:
                 continue
