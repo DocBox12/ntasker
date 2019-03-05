@@ -75,10 +75,9 @@ def search_task(uid_task, dtstart, sequence, rrule):
                 return False
             else:
                 if rrule is True:
-                    if int(dtstart) > int(start_time_from_sql):
-                        update_dtstart(uid_task, dtstart)
-                        return False
-                return True     
+                    if dtstart != start_time_from_sql:
+                        return start_time_from_sql 
+            return True  
     except sys.exc_info()[0] as error:
         ntasker_logs.save_logs(error)
         return True   

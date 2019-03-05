@@ -11,6 +11,9 @@ from dateutil.rrule import rrulestr
 import ntasker_sqlite
 
 
+DICT_rrule = {}
+
+
 def search_tasks(URL, timezone, next_day):
 
     LIST_with_tasks = []
@@ -30,6 +33,7 @@ def search_tasks(URL, timezone, next_day):
 
     for i in range(len(LIST_data_from_calendar)):
         task_details = LIST_data_from_calendar[i]
+        uid_task = task_details.uid
         start_date_from_task = task_details.begin.to(timezone).format('YYYYMMDD') # Covert time for humans
 
         if int(today_is) == int(start_date_from_task):
@@ -45,6 +49,7 @@ def search_tasks(URL, timezone, next_day):
                 rrule_data = value.after(datetime.datetime.now()).strftime("%Y%m%d")
                 if int(rrule_data) == int(today_is):
                     LIST_with_tasks.append(task_details)
+                    DICT_rrule.update({uid_task:rrule_data})
                 else:
                     continue
 
@@ -122,12 +127,35 @@ def import_tasks_from_calendar(URL, timezone, tags, today, raw_data_from_json, A
         comment_from_calendar_from_dict = DICT_comment.get(uid_task) 
         start_date_from_task_from_dict = DICT_start_date_from_task.get(uid_task)
         task_duration_from_calendar_from_dict = DICT_task_duration.get(uid_task)
+        rrule_time_calendar_from_dict = DICT_rrule.get(uid_task)
 
-        result_sql = ntasker_sqlite.search_task(uid_task, dtstart_from_dict, sequence_number_from_dict, False)
+        '''
+         If rrule is None send to SQL the time from dstart and mark task as False that is, not having a rrule
+
+         else
+
+         send to SQL the time from rrule and mark task as True that is having a rrule.
+        '''
+        
+        if rrule_time_calendar_from_dict is None:
+            result_sql = ntasker_sqlite.search_task(uid_task, dtstart_from_dict, sequence_number_from_dict, False)
+        else:
+            result_sql = ntasker_sqlite.search_task(uid_task, rrule_time_calendar_from_dict, sequence_number_from_dict, True)
+
+        '''
+        True - The task is in the database and has not changed
+
+        String - The task is in the database, but the date of sending the task from the database is                different from the date from the rrule, therefore the date must be updated in the                 database and the task sent again. This is used for repetitive tasks because one UID is            generated and subsequent dates are generated based on RRULE. Therefore, this                      condition must be checked for the task to be sent.
+
+        None - The task isn't in the database - they should be sent and added to the database
+        '''
+
         if result_sql is True:
             continue
-    
-        
+        elif result_sql is str:
+            ntasker_sqlite.update_dtstart(uid_task, rrule_time_calendar_from_dict)
+        elif result_sql is None:
+            ntasker_sqlite.add_task(uid_task, dtstart_from_dict, sequence_number_from_dict)
         '''
         Unfortunately, Nozbe does not understand the calculated time and must be changed. See the subtracting_time function
         REMEMBER! Nozbe will set the length of the task only when it appears after the word Today. See instructions:
@@ -167,22 +195,22 @@ def import_tasks_from_calendar(URL, timezone, tags, today, raw_data_from_json, A
             if one_task_from_json.lower() == "___comment___":
                 continue
             if one_task_from_json.lower() == task_name_from_calendar_from_dict.lower():
-                result_sql = ntasker_sqlite.search_task(uid_task, dtstart_from_dict, sequence_number_from_dict, True)
-                if result_sql is True:
-                    continue 
+                #result_sql = ntasker_sqlite.search_task(uid_task, dtstart_from_dict, #sequence_number_from_dict, True)
+                #if result_sql is True:
+                    #continue 
                 comment = DICT_all_tasks.get(one_task_from_json)
                 one_task_from_json = one_task_from_json + " " + str(today.lower()) + " " + str(start_date_for_json) + " " + str(hashtah_time)
                 ntasker_email.send_email(one_task_from_json, comment)
-                if result_sql is None:
-                    ntasker_sqlite.add_task(uid_task, dtstart_from_dict, sequence_number_from_dict)
+                #if result_sql is None:
+                    #ntasker_sqlite.add_task(uid_task, dtstart_from_dict, sequence_number_from_dict)
                 break
             else:
                 continue
         else:
             task_syntax = str(task_name_from_calendar_from_dict) + " " + str(tags) + " " + str(today.lower()) + " " + str(start_date_for_calendar) + " " + str(hashtah_time)
             ntasker_email.send_email(task_syntax, comment_from_calendar_from_dict)
-            if result_sql is None:
-                ntasker_sqlite.add_task(uid_task, dtstart_from_dict, sequence_number_from_dict)
+            #if result_sql is None:
+                #ntasker_sqlite.add_task(uid_task, dtstart_from_dict, sequence_number_from_dict)
 
         
 
