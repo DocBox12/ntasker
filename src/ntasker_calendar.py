@@ -45,7 +45,7 @@ def search_tasks(URL, timezone, next_day):
         for j in range(len(LIST_task_details)):
             if "RRULE" in LIST_task_details[j]:
                 rrule_details = LIST_task_details[j]
-                value = rrulestr(rrule_details)
+                value = rrulestr(rrule_details, dtstart=task_details.begin.to(timezone))
                 rrule_data = value.after(datetime.datetime.now()).strftime("%Y%m%d")
                 if int(rrule_data) == int(today_is):
                     LIST_with_tasks.append(task_details)
