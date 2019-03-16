@@ -94,6 +94,10 @@ Add_start_time = config['Calendar']['add_start_time']
 
 tasks_json = config['JSON']['json_localization']
 
+python_in_env = config['ENV']['python_in_env']
+ntasker_cron_path = config['ENV']['ntasker_cron_path']
+task_name_in_screen = config['ENV']['task_name_in_screen']
+
 parser = argparse.ArgumentParser()
 
 parser.add_argument("--verify", help="Verify json file. If file have errors program return information about this.", action="store_true")
@@ -101,6 +105,8 @@ parser.add_argument("--verify", help="Verify json file. If file have errors prog
 parser.add_argument("--debug", help="Send tasks to nozbe without regardless day of the week.", action="store_true")
 
 parser.add_argument("--run", help="Run app and send tasks to Nozbe only from json file.", action="store_true")
+
+parser.add_argument("--cron", help="Run ntasker_cron in screen", action="store_true")
 
 parser.add_argument("--importtoday", help="Import tasks from calendar and add to nozbe.", action="store_true")
 
@@ -153,3 +159,7 @@ if args.remove_logs:
 
 if args.kill:
     kill_process()
+
+if args.cron:
+    env_exe = "screen -S " +  task_name_in_screen + " -md " + python_in_env + " " + ntasker_cron_path
+    os.system(env_exe)
