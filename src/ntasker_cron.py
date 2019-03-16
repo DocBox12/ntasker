@@ -7,6 +7,12 @@ import main
 
 def start_cron():
 
+   # Get and save pid in file
+    pid_number = os.getpid()
+    with open(pid_file, 'w') as pf:
+        pf.write(str(pid_number))
+        pf.close()
+
     while True:
         now_time = time.strftime("%H:%M")
         time.sleep(int(check_new_tasks))
@@ -30,5 +36,8 @@ if __name__ == "__main__":
     send_tasks_from_json = config['Cron']['send_tasks_from_json']
     send_task_tomorrow_from_calendar = config['Cron']['send_task_tomorrow_from_calendar']
 
+    pid_file = os.path.join(os.path.dirname(__file__), 'pid.txt') 
+    if not os.path.exists(pid_file):
+        open(pid_file, "w+")
 
     start_cron()

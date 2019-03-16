@@ -66,7 +66,19 @@ def import_next_day_flag():
     hashtags = get_tags_for_calendar()
     ntasker_calendar.import_tasks_from_calendar(ical_url, timezone, hashtags, today, json_content, Add_start_time, True)
     return
-            
+
+def kill_process():
+    with open(pid_file, 'r') as pf:
+        pid_number = pf.read()
+        pf.close()
+
+    command_exe = "kill " + pid_number
+    os.system(command_exe)
+    exit()
+    return
+
+pid_file = os.path.join(os.path.dirname(__file__), 'pid.txt') 
+
 # Loading config
 config = configparser.RawConfigParser()
 
@@ -102,6 +114,8 @@ parser.add_argument("--remove_logs", help="Remove all log files.", action="store
 
 parser.add_argument("--check_update", help="Checks if a new version of the program is available", action="store_true")
 
+parser.add_argument("--kill", help="Closes the ntasker_cron process", action="store_true")
+
 parser.add_argument("--version", help="Show version", action="store_true")
 
 args = parser.parse_args()
@@ -136,3 +150,6 @@ if args.version:
 
 if args.remove_logs:
     ntasker_logs.remove_all_logs()
+
+if args.kill:
+    kill_process()
