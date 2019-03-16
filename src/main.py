@@ -86,11 +86,11 @@ config_file = os.path.join(os.path.dirname(__file__), 'config.ini')
 config.read(config_file)
 
 ical_url = config['Calendar']['ical_url']
-timezone = config['Calendar']['Timezone']
+timezone = config['Calendar']['timezone']
 
-today = config['Translation']['Today']
-tomorrow = config['Translation']['Tomorrow']
-Add_start_time = config['Calendar']['Add_start_time']
+today = config['Translation']['today']
+tomorrow = config['Translation']['tomorrow']
+Add_start_time = config['Calendar']['add_start_time']
 
 tasks_json = config['JSON']['json_localization']
 
