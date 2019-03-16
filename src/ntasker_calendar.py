@@ -9,6 +9,8 @@ import datetime
 import ntasker_email
 from dateutil.rrule import rrulestr
 import ntasker_sqlite
+import sys
+import ntasker_logs
 
 
 DICT_rrule = {}
@@ -25,9 +27,12 @@ def search_tasks(URL, timezone, next_day):
     else:
         today_is = time.strftime("%Y%m%d")    
 
-    raw_url = Calendar(urlopen(URL).read().decode('utf-8'))
-
-    raw_url = Calendar(requests.get(URL).text)
+    try:
+        raw_url = Calendar(urlopen(URL).read().decode('utf-8'))
+        raw_url = Calendar(requests.get(URL).text)
+    except sys.exc_info()[0] as error:
+        ntasker_logs.save_logs(error)
+        return
 
     LIST_data_from_calendar = raw_url.events
 
